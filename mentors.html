@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor-Student Assigning</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="index.html" >Student <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="AddStudentMentor.html">Add Student</a>
+                </li>
+              <li class="nav-item">
+                <a class="nav-link" href="mentors.html">Mentors</a>
+              </li>
+            <li class="nav-item">
+              <a class="nav-link" href="AssignStudent_Mentor.html">Assign Student to Mentor</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="AssignMentor_student.html">Assign Mentor to Student</a>
+              </li>
+             
+          </ul>
+        </div>
+      </nav>
+      <div id="details">
+        <form onsubmit="getstudentlist();return false">
+           
+            <label for="mentors">Mentors</label>
+            <select name="mentors" id="mentors">
+            
+            </select>
+            
+            <input type="submit" value="Submit">
+            <div id="list"></div>
+          </form>
+      </div>
+      </div>
+    <script>   
+        
+        async function getMentors(){
+            try {
+                let mentorsfetch = await fetch("https://assign-student-mentor.herokuapp.com/mentors");
+                let details = await mentorsfetch.json();
+                let sel = document.getElementById('mentors');
+                              
+
+                details.forEach(element => {
+                   let opt = document.createElement('option');
+                   opt.innerText=element.name;
+                    opt.value = element._id;
+                    sel.append(opt);
+                });
+                
+            } catch (error) {
+                console.log(error);
+            }
+
+
+        }
+        getMentors(); 
+
+        async function getstudentlist(){
+            var selmentor= document.getElementById("mentors");
+            let mentor = selmentor.options[selmentor.selectedIndex].value;
+            
+
+           try {               
+             
+                let mentorsfetch = await fetch(`https://assign-student-mentor.herokuapp.com/mentor/${mentor}`);
+                studentlist = await mentorsfetch.json();
+                document.getElementById('list').innerHTML="";
+                let ul = document.createElement('ul');  
+                for(i of studentlist)
+                {
+                    let li= document.createElement('li');
+                    li.innerHTML = i;
+                    ul.appendChild(li);
+                }
+                
+                document.getElementById('list').append(ul);
+               
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+     
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor-Student Assigning</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="index.html" >Student <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="AddStudentMentor.html">Add Student</a>
+              </li>
+            <li class="nav-item">
+              <a class="nav-link" href="mentors.html">Mentors</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="AssignStudent_Mentor.html">Assign Student to Mentor</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="AssignMentor_student.html">Assign Mentor to Student</a>
+              </li>
+             
+          </ul>
+        </div>
+      </nav>
+      <div id="details">
+        <form>
+            <div class="form-group">
+              <label for="sel1">Mentor:</label>
+              <select class="form-control" id="sel1">
+                
+              </select>
+              <br>
+              <label for="sel2">Student:</label>
+              <select multiple class="form-control" id="sel2">
+                
+              </select>
+            </div>
+          </form>
+          <button type="submit" onclick="updatementor()">Assign</button>
+      </div>
+      </div>
+    <script>
+
+        let studentobj =[];
+        let mentorobj =[];
+        let students=[];
+
+        async function getStudent(){
+            
+            try {
+                let studentfetch = await fetch("https://assign-student-mentor.herokuapp.com/students");
+                let details = await studentfetch.json();
+                let sel = document.getElementById('sel2');   
+                                          
+
+                details.forEach(element => {
+                    if(element["mentorid"]==='' || element["mentorid"]===null){
+                    
+                        let opt = document.createElement('option');
+                        opt.innerText=element.name;
+                        opt.id = element.id;
+                        sel.append(opt);
+                        studentobj.push({"id":element._id,"name":element.name});
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        getStudent();
+
+        async function getMentors(){
+            try {
+                let mentorsfetch = await fetch("https://assign-student-mentor.herokuapp.com/mentors");
+                let details = await mentorsfetch.json();
+                let sel = document.getElementById('sel1');
+                              
+
+                details.forEach(element => {
+                   let opt = document.createElement('option');
+                   opt.innerText=element.name;
+                   opt.id = element.id;
+                   sel.append(opt);
+                   mentorobj.push({"id":element._id,"name":element.name});
+                });
+                
+            } catch (error) {
+                console.log(error);
+            }
+
+
+        }
+        getMentors();
+
+        async function updatementor(){  
+            var stud=[];
+            var sel1 = document.getElementById("sel1");
+            var opt = sel1.options[sel1.selectedIndex];
+            console.log(opt.value);
+
+            var sel2 = document.getElementById("sel2");
+
+            for ( var i = 0, len = sel2.options.length; i < len; i++ ) {
+              var  opts = sel2.options[i];
+                if ( opts.selected === true ) {
+                    students.push(opts.value);
+                }
+            }
+
+            let ids=[];
+            for(i of students)
+            {
+              studentobj.find(o => {if(o.name === i){
+                ids.push(o.id);
+              }});
+            }
+
+            let mentorid = mentorobj.find(m=>{if(m.name === opt.value){
+                return m.id;
+            }})
+
+           
+            //stud.push(.)
+            var data = {
+                 "studentid":ids
+            }
+            
+            try {
+                await fetch(`https://assign-student-mentor.herokuapp.com/mentor/${mentorid["id"]}`,{
+                    method:'PUT',
+                    body:JSON.stringify(data),
+                    headers:{
+                        "Content-Type":"application/json"
+                    }
+                })
+                alert('Student Assigned');
+               
+            } catch (error) {
+                console.log(error);
+            }
+
+        
+    };
+
+        
+    </script>
+    
+</body>
+</html>
